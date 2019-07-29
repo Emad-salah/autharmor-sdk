@@ -4,12 +4,19 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "yarn build src/index.js"
+    "build": "parcel build src/index.js"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "parcel": "^1.12.3"
   },
   "dependencies": {
     "axios": "^0.19.0"
+  },
+  "babel": {
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
+    ]
   }
 }
