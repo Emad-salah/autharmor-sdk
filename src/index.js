@@ -4,6 +4,9 @@ export default class AuthArmor {
     this.userReferenceID = options.userReferenceID;
     this.onAuthenticating = options.onAuthenticating;
     this.onAuthenticated = options.onAuthenticated;
+  }
+
+  init = () => {
     document.body.innerHTML += `
       <style>
         .popup-overlay {
@@ -71,7 +74,7 @@ export default class AuthArmor {
       this.onAuthenticated();
       document.querySelector(".popup-overlay").classList.remove("hidden");
     };
-  }
+  };
 
   setUserReferenceID = id => {
     this.userReferenceID = id;
