@@ -70,7 +70,6 @@ export default class AuthArmor {
 
     window.buttonClick = name => {
       this.onButtonClick(name);
-      window.close();
     };
 
     window.openedWindow = () => {
