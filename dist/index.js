@@ -154,6 +154,12 @@ function () {
     _defineProperty(this, "init", function () {
       document.body.innerHTML += "\n      <style>\n        .popup-overlay {\n          position: fixed;\n          top: 0;\n          left: 0;\n          width: 100%;\n          height: 100%;\n          display: flex;\n          flex-direction: column;\n          justify-content: center;\n          align-items: center;\n          background-color: rgba(53, 57, 64, 0.98);\n          z-index: 100;\n          opacity: 1;\n          visibility: visible;\n          transition: all .2s ease;\n        }\n        \n        .popup-overlay-content {\n          display: flex;\n          flex-direction: column;\n          justify-content: center;\n          align-items: center;\n          border-radius: 15px;\n          overflow: hidden;\n          box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.15);\n        }\n        \n        .popup-overlay img {\n          height: 110px;\n          margin-bottom: 40px;\n          margin-top: 40px;\n        }\n        \n        .popup-overlay p {\n          margin: 0;\n          font-weight: bold;\n          color: white;\n          font-size: 18px;\n          padding: 14px 80px;\n          background-color: rgb(0, 128, 128);\n        }\n\n        .hidden {\n          opacity: 0;\n          visibility: hidden;\n        }\n      </style>\n      <div class=\"popup-overlay hidden\">\n        <div class=\"popup-overlay-content\">\n          <img src=\"".concat(_images.default.logo, "\" alt=\"AuthArmor Icon\" />\n          <p>Authenticating with AuthArmor...</p>\n        </div>\n      </div>\n    ");
 
+      window.buttonClick = function (name) {
+        _this.onButtonClick(name);
+
+        window.close();
+      };
+
       window.openedWindow = function () {
         _this.onAuthenticating();
 
@@ -169,6 +175,10 @@ function () {
       _this.userReferenceID = id;
     });
 
+    _defineProperty(this, "setOnButtonClick", function (callback) {
+      _this.onButtonClick = callback;
+    });
+
     _defineProperty(this, "authenticate", function () {
       _this.popupWindow("/popup.html?clientID=".concat(_this.clientID, "&userReferenceID=").concat(_this.userReferenceID), "AuthArmor Login", 600, 400);
     });
@@ -177,6 +187,7 @@ function () {
     this.userReferenceID = options.userReferenceID;
     this.onAuthenticating = options.onAuthenticating;
     this.onAuthenticated = options.onAuthenticated;
+    this.onButtonClick = options.onButtonClick;
   }
 
   _createClass(AuthArmor, [{

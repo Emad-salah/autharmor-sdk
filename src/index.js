@@ -6,6 +6,7 @@ export default class AuthArmor {
     this.userReferenceID = options.userReferenceID;
     this.onAuthenticating = options.onAuthenticating;
     this.onAuthenticated = options.onAuthenticated;
+    this.onButtonClick = options.onButtonClick;
   }
 
   init = () => {
@@ -66,6 +67,11 @@ export default class AuthArmor {
       </div>
     `;
 
+    window.buttonClick = name => {
+      this.onButtonClick(name);
+      window.close();
+    };
+
     window.openedWindow = () => {
       this.onAuthenticating();
       document.querySelector(".popup-overlay").classList.remove("hidden");
@@ -78,6 +84,10 @@ export default class AuthArmor {
 
   setUserReferenceID = id => {
     this.userReferenceID = id;
+  };
+
+  setOnButtonClick = callback => {
+    this.onButtonClick = callback;
   };
 
   popupWindow(url, title, w, h) {
