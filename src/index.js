@@ -2,11 +2,12 @@ import images from "./assets/images.json";
 
 export default class AuthArmor {
   constructor(options = {}) {
+    const defaultFunction = () => {};
     this.clientID = options.clientID;
     this.userReferenceID = options.userReferenceID;
-    this.onAuthenticating = options.onAuthenticating;
-    this.onAuthenticated = options.onAuthenticated;
-    this.onButtonClick = options.onButtonClick;
+    this.onAuthenticating = options.onAuthenticating || defaultFunction;
+    this.onAuthenticated = options.onAuthenticated || defaultFunction;
+    this.onButtonClick = options.onButtonClick || defaultFunction;
   }
 
   init = () => {
