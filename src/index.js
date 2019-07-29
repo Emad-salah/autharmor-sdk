@@ -44,6 +44,11 @@ export default class AuthArmor {
           padding: 14px 80px;
           background-color: rgb(0, 128, 128);
         }
+
+        .hidden {
+          opacity: 0;
+          visibility: hidden;
+        }
       </style>
       <div class="popup-overlay hidden">
         <div class="popup-overlay-content">
