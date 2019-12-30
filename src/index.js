@@ -1,17 +1,22 @@
+import Http from "axios";
+import config from "./config";
 import images from "./assets/images.json";
 
-export default class AuthArmor {
-  constructor(options = {}) {
-    const defaultFunction = () => {};
-    this.clientID = options.clientID;
-    this.userReferenceID = options.userReferenceID;
-    this.onAuthenticating = options.onAuthenticating || defaultFunction;
-    this.onAuthenticated = options.onAuthenticated || defaultFunction;
-    this.onButtonClick = options.onButtonClick || defaultFunction;
-  }
+Http.defaults.baseURL = config.apiURL;
 
-  init = () => {
-    document.body.innerHTML += `
+export default class AuthArmor {
+	constructor(options = {}) {
+		const defaultFunction = () => {};
+		this.clientID = options.clientID;
+		this.userReferenceID = options.userReferenceID;
+		this.onAuthenticating = options.onAuthenticating || defaultFunction;
+		this.onAuthenticated = options.onAuthenticated || defaultFunction;
+    this.onButtonClick = options.onButtonClick || defaultFunction;
+    this.inviteCode = "";
+	}
+
+	init() {
+		document.body.innerHTML += `
       <style>
         .popup-overlay {
           position: fixed;
@@ -68,35 +73,39 @@ export default class AuthArmor {
       </div>
     `;
 
-    window.buttonClick = name => {
-      this.onButtonClick(name);
-    };
+		window.buttonClick = name => {
+			this.onButtonClick(name);
+		};
 
-    window.openedWindow = () => {
-      this.onAuthenticating();
-      document.querySelector(".popup-overlay").classList.remove("hidden");
-    };
+		window.openedWindow = () => {
+			this.onAuthenticating();
+			document.querySelector(".popup-overlay").classList.remove("hidden");
+		};
 
-    window.closedWindow = () => {
-      document.querySelector(".popup-overlay").classList.add("hidden");
-    };
-  };
+		window.closedWindow = () => {
+			document.querySelector(".popup-overlay").classList.add("hidden");
+		};
+	}
 
-  setUserReferenceID = id => {
-    this.userReferenceID = id;
-  };
+	setUserReferenceID(id) {
+		this.userReferenceID = id;
+	}
 
-  setOnButtonClick = callback => {
-    this.onButtonClick = callback;
-  };
+	setOnButtonClick(callback) {
+		this.onButtonClick = callback;
+	}
+  
+  setInviteCode(id) {
+    this.inviteCode = id;
+  }
 
-  popupWindow(url, title, w, h) {
-    var y = window.outerHeight / 2 + window.screenY - h / 2;
-    var x = window.outerWidth / 2 + window.screenX - w / 2;
-    return window.open(
-      url,
-      title,
-      `toolbar=no, 
+	popupWindow(url, title, w, h) {
+		var y = window.outerHeight / 2 + window.screenY - h / 2;
+		var x = window.outerWidth / 2 + window.screenX - w / 2;
+		return window.open(
+			url,
+			title,
+			`toolbar=no, 
       location=no, 
       directories=no, 
       status=no, 
@@ -108,17 +117,15 @@ export default class AuthArmor {
       height=${h}, 
       top=${y}, 
       left=${x}`
-    );
-  }
+		);
+	}
 
-  authenticate = () => {
-    this.popupWindow(
-      `/popup.html?clientID=${this.clientID}&userReferenceID=${
-        this.userReferenceID
-      }`,
-      "AuthArmor Login",
-      600,
-      400
-    );
-  };
+	authenticate() {
+		this.popupWindow(
+			`https://localhost:44327/?i=${this.inviteCode}`,
+			"Link your account with AuthArmor",
+			600,
+			400
+		);
+	}
 }
