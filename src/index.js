@@ -68,19 +68,48 @@ export default class AuthArmor {
       <div class="popup-overlay hidden">
         <div class="popup-overlay-content">
           <img src="${images.logo}" alt="AuthArmor Icon" />
-          <p>Authenticating with AuthArmor...</p>
+          <p class="auth-message">Authenticating with AuthArmor...</p>
         </div>
       </div>
     `;
 
-		window.buttonClick = name => {
-			this.onButtonClick(name);
-		};
-
 		window.openedWindow = () => {
 			this.onAuthenticating();
 			document.querySelector(".popup-overlay").classList.remove("hidden");
-		};
+    };
+    
+    window.AUTHARMOR_acceptRequest = (data) => {
+      this.onInviteAccepted(data);
+      if (data) {
+        document.querySelector(".auth-message").classList.add("autharmor--success");
+        document.querySelector(".auth-message").textContent = data.message;
+      }
+      setTimeout(() => {
+        document.querySelector(".popup-overlay").classList.remove("hidden");
+      }, 500);
+    };
+
+    window.AUTHARMOR_cancelRequest = (data) => {
+			this.onInviteCancelled(data);
+      if (data) {
+        document.querySelector(".auth-message").classList.add("autharmor--danger");
+        document.querySelector(".auth-message").textContent = data.message;
+      }
+      setTimeout(() => {
+        document.querySelector(".popup-overlay").classList.remove("hidden");
+      }, 500);
+    };
+
+    window.AUTHARMOR_error = (data) => {
+			this.onError(data);
+      if (data) {
+        document.querySelector(".auth-message").classList.add("autharmor--danger");
+        document.querySelector(".auth-message").textContent = data.message;
+      }
+      setTimeout(() => {
+        document.querySelector(".popup-overlay").classList.remove("hidden");
+      }, 500);
+    };
 
 		window.closedWindow = () => {
 			document.querySelector(".popup-overlay").classList.add("hidden");
@@ -91,8 +120,16 @@ export default class AuthArmor {
 		this.userReferenceID = id;
 	}
 
-	setOnButtonClick(callback) {
-		this.onButtonClick = callback;
+	setOnInviteAccepted(callback) {
+		this.onInviteAccepted = callback;
+  }
+  
+  setOnInviteCancelled(callback) {
+		this.onInviteCancelled = callback;
+  }
+  
+  setOnError(callback) {
+		this.onError = callback;
 	}
   
   setInviteCode(id) {
