@@ -13,6 +13,8 @@ export default class AuthArmor {
 		this.onAuthenticated = options.onAuthenticated || defaultFunction;
     this.onButtonClick = options.onButtonClick || defaultFunction;
     this.inviteCode = "";
+    this.signature = "";
+    this.init = this.init.bind(this);
 	}
 
 	init() {
@@ -136,6 +138,10 @@ export default class AuthArmor {
     this.inviteCode = id;
   }
 
+  setSignature(signature) {
+    this.signature = signature;
+  }
+
 	popupWindow(url, title, w, h) {
 		var y = window.outerHeight / 2 + window.screenY - h / 2;
 		var x = window.outerWidth / 2 + window.screenX - w / 2;
@@ -159,7 +165,7 @@ export default class AuthArmor {
 
 	authenticate() {
 		this.popupWindow(
-			`https://localhost:44327/?i=${this.inviteCode}`,
+			`https://localhost:44327/?i=${this.inviteCode}&aa_sig=${this.signature}`,
 			"Link your account with AuthArmor",
 			600,
 			400
