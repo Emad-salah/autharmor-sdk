@@ -45,6 +45,7 @@ class AuthArmorInstance {
           border-radius: 15px;
           overflow: hidden;
           box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.15);
+          background-color: #2b313c;
         }
         
         .popup-overlay img {
@@ -164,6 +165,7 @@ class AuthArmorInstance {
 	}
 
 	authenticate() {
+    this.onAuthenticating();
 		this.popupWindow(
 			`https://localhost:44327/?i=${this.inviteCode}&aa_sig=${this.signature}`,
 			"Link your account with AuthArmor",
