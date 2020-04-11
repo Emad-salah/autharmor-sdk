@@ -168,7 +168,7 @@ class AuthArmorInstance {
     this.onAuthenticating();
     document.querySelector(".popup-overlay").classList.remove("hidden");
 		this.popupWindow(
-			`https://localhost:44327/?i=${this.inviteCode}&aa_sig=${this.signature}`,
+			`${config.inviteURL}/?i=${this.inviteCode}&aa_sig=${this.signature}`,
 			"Link your account with AuthArmor",
 			600,
 			400
