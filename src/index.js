@@ -4,7 +4,7 @@ import images from "./assets/images.json";
 
 Http.defaults.baseURL = config.apiURL;
 
-export default class AuthArmor {
+class AuthArmorInstance {
 	constructor(options = {}) {
 		const defaultFunction = () => {};
 		this.clientID = options.clientID;
@@ -172,3 +172,7 @@ export default class AuthArmor {
 		);
 	}
 }
+
+window.AuthArmor = AuthArmorInstance;
+
+export default AuthArmorInstance
