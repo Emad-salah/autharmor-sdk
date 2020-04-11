@@ -88,7 +88,7 @@ class AuthArmorInstance {
         document.querySelector(".auth-message").textContent = data.message;
       }
       setTimeout(() => {
-        document.querySelector(".popup-overlay").classList.remove("hidden");
+        document.querySelector(".popup-overlay").classList.add("hidden");
       }, 500);
     };
 
@@ -99,7 +99,7 @@ class AuthArmorInstance {
         document.querySelector(".auth-message").textContent = data.message;
       }
       setTimeout(() => {
-        document.querySelector(".popup-overlay").classList.remove("hidden");
+        document.querySelector(".popup-overlay").classList.add("hidden");
       }, 500);
     };
 
@@ -110,7 +110,7 @@ class AuthArmorInstance {
         document.querySelector(".auth-message").textContent = data.message;
       }
       setTimeout(() => {
-        document.querySelector(".popup-overlay").classList.remove("hidden");
+        document.querySelector(".popup-overlay").classList.add("hidden");
       }, 500);
     };
 
@@ -166,6 +166,7 @@ class AuthArmorInstance {
 
 	authenticate() {
     this.onAuthenticating();
+    document.querySelector(".popup-overlay").classList.remove("hidden");
 		this.popupWindow(
 			`https://localhost:44327/?i=${this.inviteCode}&aa_sig=${this.signature}`,
 			"Link your account with AuthArmor",
