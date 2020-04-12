@@ -144,9 +144,9 @@ class AuthArmorInstance {
   }
 
 	popupWindow(url, title, w, h) {
-		var y = window.outerHeight / 2 + window.screenY - h / 2;
-		var x = window.outerWidth / 2 + window.screenX - w / 2;
-		return window.open(
+		const y = window.outerHeight / 2 + window.screenY - h / 2;
+		const x = window.outerWidth / 2 + window.screenX - w / 2;
+		const openedWindow = window.open(
 			url,
 			title,
 			`toolbar=no, 
@@ -161,7 +161,13 @@ class AuthArmorInstance {
       height=${h}, 
       top=${y}, 
       left=${x}`
-		);
+    );
+    const interval = setInterval(function() {
+      if (openedWindow.closed) {
+        clearInterval(interval);
+        window.closedWindow();
+      }
+    }, 500);
 	}
 
 	authenticate() {
