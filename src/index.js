@@ -1,24 +1,121 @@
 import Http from "axios";
+import kjua from "kjua";
 import config from "./config";
 import images from "./assets/images.json";
 
-Http.defaults.baseURL = config.apiURL;
+class AuthArmorSDK {
+  constructor(url) {
+    this.url = this._processUrl(url);
+    Http.defaults.baseURL = this.url;
 
-class AuthArmorInstance {
-	constructor(options = {}) {
-		const defaultFunction = () => {};
-		this.clientID = options.clientID;
-		this.userReferenceID = options.userReferenceID;
-		this.onAuthenticating = options.onAuthenticating || defaultFunction;
-		this.onAuthenticated = options.onAuthenticated || defaultFunction;
-    this.onButtonClick = options.onButtonClick || defaultFunction;
+    // Supported events
+    this.events = [
+      "authenticating",
+      "authenticated",
+      "inviteWindowOpened",
+      "inviteWindowClosed",
+      "popupOverlayOpen",
+      "popupOverlayClosed",
+      "inviteAccepted",
+      "inviteDeclined",
+      "inviteCancelled"
+    ];
+    this.eventListeners = new Map(
+      this.events.reduce(
+        (eventListeners, eventName) => ({
+          ...eventListeners,
+          [eventName]: []
+        }),
+        {}
+      )
+    );
+
     this.inviteCode = "";
     this.signature = "";
-    this.init = this.init.bind(this);
-	}
+    this._init = this._init.bind(this);
+    this._init();
+  }
 
-	init() {
-		document.body.innerHTML += `
+  // Private Methods
+
+  _processUrl(url = "") {
+    const lastCharacter = url.slice(-1);
+    const containsSlash = lastCharacter === "/";
+    if (containsSlash) {
+      return url.slice(0, url.length - 1);
+    }
+
+    return url;
+  }
+
+  _ensureEventExists(eventName) {
+    if (!this.events.includes(eventName)) {
+      throw new Error("Event doesn't exist");
+    }
+  }
+
+  _popupWindow(url, title, w, h) {
+    const y = window.outerHeight / 2 + window.screenY - h / 2;
+    const x = window.outerWidth / 2 + window.screenX - w / 2;
+    const openedWindow = window.open(
+      url,
+      title,
+      `toolbar=no, 
+      location=no, 
+      directories=no, 
+      status=no, 
+      menubar=no, 
+      scrollbars=no, 
+      resizable=no, 
+      copyhistory=no, 
+      width=${w}, 
+      height=${h}, 
+      top=${y}, 
+      left=${x}`
+    );
+    this._executeEvent("inviteWindowOpened");
+    const interval = setInterval(function() {
+      if (openedWindow.closed) {
+        clearInterval(interval);
+        window.closedWindow();
+      }
+    }, 500);
+  }
+
+  _showPopup(message = "Waiting for device") {
+    document.querySelector(".popup-overlay").classList.remove("hidden");
+    document.querySelector(".auth-message").textContent = message;
+    this._executeEvent("popupOverlayOpened");
+  }
+
+  _hidePopup(delay = 500) {
+    setTimeout(() => {
+      document.querySelector(".popup-overlay").classList.add("hidden");
+      document
+        .querySelector(".auth-message")
+        .setAttribute("class", "auth-message");
+      document.querySelector(".auth-message").textContent =
+        "Waiting for device";
+      this._executeEvent("popupOverlayClosed");
+    }, delay);
+  }
+
+  _updateMessage(message, status = "success") {
+    document
+      .querySelector(".auth-message")
+      .classList.add(`autharmor--${status}`);
+    document.querySelector(".auth-message").textContent = message;
+  }
+
+  _executeEvent(eventName, ...data) {
+    this._ensureEventExists(eventName);
+
+    const listeners = this.eventListeners.get(eventName);
+    listeners.map(listener => listener(...data));
+  }
+
+  _init() {
+    document.body.innerHTML += `
       <style>
         .popup-overlay {
           position: fixed;
@@ -76,112 +173,189 @@ class AuthArmorInstance {
       </div>
     `;
 
-		window.openedWindow = () => {
-			this.onAuthenticating();
-			document.querySelector(".popup-overlay").classList.remove("hidden");
+    window.openedWindow = () => {
+      this._executeEvent("inviteWindowOpened");
+      this._showPopup();
     };
-    
-    window.AUTHARMOR_acceptRequest = (data) => {
-      this.onInviteAccepted(data);
+
+    window.AUTHARMOR_acceptRequest = data => {
+      this._executeEvent("inviteAccepted", data);
       if (data) {
-        document.querySelector(".auth-message").classList.add("autharmor--success");
-        document.querySelector(".auth-message").textContent = data.message;
+        this._updateMessage(data.message);
       }
-      setTimeout(() => {
-        document.querySelector(".popup-overlay").classList.add("hidden");
-      }, 500);
+      this._hidePopup();
     };
 
-    window.AUTHARMOR_cancelRequest = (data) => {
-			this.onInviteCancelled(data);
+    window.AUTHARMOR_cancelRequest = data => {
+      this._executeEvent("inviteCancelled", data);
       if (data) {
-        document.querySelector(".auth-message").classList.add("autharmor--danger");
-        document.querySelector(".auth-message").textContent = data.message;
+        this._updateMessage(data.message, "danger");
       }
-      setTimeout(() => {
-        document.querySelector(".popup-overlay").classList.add("hidden");
-      }, 500);
+      this._hidePopup();
     };
 
-    window.AUTHARMOR_error = (data) => {
-			this.onError(data);
+    window.AUTHARMOR_error = data => {
+      this._executeEvent("error", data);
       if (data) {
-        document.querySelector(".auth-message").classList.add("autharmor--danger");
-        document.querySelector(".auth-message").textContent = data.message;
+        this._updateMessage(data.message, "danger");
       }
-      setTimeout(() => {
-        document.querySelector(".popup-overlay").classList.add("hidden");
-      }, 500);
+      this._hidePopup();
     };
 
-		window.closedWindow = () => {
-			document.querySelector(".popup-overlay").classList.add("hidden");
-		};
-	}
-
-	setUserReferenceID(id) {
-		this.userReferenceID = id;
-	}
-
-	setOnInviteAccepted(callback) {
-		this.onInviteAccepted = callback;
-  }
-  
-  setOnInviteCancelled(callback) {
-		this.onInviteCancelled = callback;
-  }
-  
-  setOnError(callback) {
-		this.onError = callback;
-	}
-  
-  setInviteCode(id) {
-    this.inviteCode = id;
+    window.closedWindow = () => {
+      this._executeEvent("inviteWindowClosed");
+      this._hidePopup();
+    };
   }
 
-  setSignature(signature) {
-    this.signature = signature;
+  // ---- Public Methods
+
+  // -- Event Listener functions
+
+  on(eventName, fn) {
+    this._ensureEventExists(eventName);
+
+    const listeners = this.eventListeners.get(eventName);
+    this.eventListeners.set(eventName, [...listeners, fn]);
   }
 
-	popupWindow(url, title, w, h) {
-		const y = window.outerHeight / 2 + window.screenY - h / 2;
-		const x = window.outerWidth / 2 + window.screenX - w / 2;
-		const openedWindow = window.open(
-			url,
-			title,
-			`toolbar=no, 
-      location=no, 
-      directories=no, 
-      status=no, 
-      menubar=no, 
-      scrollbars=no, 
-      resizable=no, 
-      copyhistory=no, 
-      width=${w}, 
-      height=${h}, 
-      top=${y}, 
-      left=${x}`
-    );
-    const interval = setInterval(function() {
-      if (openedWindow.closed) {
-        clearInterval(interval);
-        window.closedWindow();
+  off(eventName) {
+    this._ensureEventExists(eventName);
+
+    this.eventListeners.set(eventName, []);
+  }
+
+  // -- Invite functionality
+
+  setInviteData({ inviteCode, signature } = {}) {
+    if (!inviteCode || !signature) {
+      throw new Error("Please specify an invite code and a signature");
+    }
+
+    if (inviteCode !== undefined) {
+      this.inviteCode = inviteCode;
+    }
+
+    if (signature !== undefined) {
+      this.signature = signature;
+    }
+
+    return {
+      getQRCode: () => {
+        const stringifiedInvite = JSON.stringify({
+          invite_code: inviteCode,
+          aa_sig: signature
+        });
+        return kjua({
+          text: stringifiedInvite,
+          rounded: 10,
+          back: "#202020",
+          fill: "#2db4b4"
+        }).src;
+      },
+      getInviteLink: () => {
+        return `${config.inviteURL}/?i=${inviteCode}&aa_sig=${signature}`;
+      },
+      useInviteLink: () => {
+        this._showPopup();
+        this._popupWindow(
+          `${config.inviteURL}/?i=${inviteCode}&aa_sig=${signature}`,
+          "Link your account with AuthArmor",
+          600,
+          400
+        );
       }
-    }, 500);
-	}
+    };
+  }
 
-	authenticate() {
-    this.onAuthenticating();
-    document.querySelector(".popup-overlay").classList.remove("hidden");
-		this.popupWindow(
-			`${config.inviteURL}/?i=${this.inviteCode}&aa_sig=${this.signature}`,
-			"Link your account with AuthArmor",
-			600,
-			400
-		);
-	}
+  async generateInviteCode({ nickname, referenceId }) {
+    if (!nickname) {
+      throw new Error("Please specify a nickname for the invite code");
+    }
+
+    const { data } = await Http.get(`/auth/autharmor/invite`, {
+      nickname,
+      referenceId
+    });
+
+    return {
+      ...data,
+      getQRCode: () => {
+        const stringifiedInvite = JSON.stringify(data);
+        return kjua({
+          text: stringifiedInvite,
+          rounded: 10,
+          back: "#202020",
+          fill: "#2db4b4"
+        }).src;
+      },
+      getInviteLink: () => {
+        return `${config.inviteURL}/?i=${data.invite_code}&aa_sig=${data.aa_sig}`;
+      },
+      useInviteLink: () => {
+        this._showPopup();
+        this._popupWindow(
+          `${config.inviteURL}/?i=${data.invite_code}&aa_sig=${data.aa_sig}`,
+          "Link your account with AuthArmor",
+          600,
+          400
+        );
+      }
+    };
+  }
+
+  async confirmInvite(id) {
+    this._executeEvent("authenticating");
+    const { data } = await Http.get(`/auth/autharmor/invite/confirm`, {
+      profileId: id
+    });
+    console.log(data);
+  }
+
+  // -- Authentication functionality
+
+  async authenticate() {
+    try {
+      this._showPopup();
+      const { data } = await Http.get(`/auth/autharmor/auth/request`);
+
+      if (data.response_message === "Timeout") {
+        this._updateMessage("Authentication request timed out", "warn");
+      }
+
+      if (data.response_message === "Success") {
+        this._updateMessage("Authentication request approved!", "warn");
+      }
+
+      if (data.response_message === "Declined") {
+        this._updateMessage("Authentication request declined", "danger");
+      }
+
+      this._hidePopup();
+
+      return data;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Public interfacing SDK functions
+
+  get invite() {
+    return {
+      generateInviteCode: this.generateInviteCode,
+      setInviteData: this.setInviteData,
+      confirmInvite: this.confirmInvite
+    };
+  }
+
+  get auth() {
+    return {
+      authenticate: this.authenticate
+    };
+  }
 }
 
-window.AuthArmor = AuthArmorInstance;
+window.AuthArmor = AuthArmorSDK;
 
-export default AuthArmorInstance
+export default AuthArmorSDK;
