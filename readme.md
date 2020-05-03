@@ -2,8 +2,6 @@
 
 ## 🏁 Installation
 
----
-
 You can integrate the AuthArmor SDK into your website by installing and importing our NPM package:
 
 ```bash
@@ -21,8 +19,6 @@ You can also load the SDK via our CDN by placing this `script` tag in your app's
 ```
 
 ## 🧭 Usage
-
----
 
 ### 🚀 Initializing the SDK
 
