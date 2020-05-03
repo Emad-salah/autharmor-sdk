@@ -4,11 +4,13 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "parcel build src/index.js"
+    "build": "parcel build src/index.js --global AuthArmorSDK"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-optional-chaining": "^7.9.0",
+    "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-config-standard": "^14.1.0",
@@ -32,7 +34,8 @@
   },
   "babel": {
     "plugins": [
-      "@babel/plugin-proposal-class-properties"
+      "@babel/plugin-proposal-class-properties",
+      "@babel/plugin-proposal-optional-chaining"
     ]
   }
 }

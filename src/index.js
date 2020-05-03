@@ -314,10 +314,12 @@ class AuthArmorSDK {
 
   // -- Authentication functionality
 
-  async authenticate() {
+  async authenticate(username) {
     try {
       this._showPopup();
-      const { data } = await Http.get(`/auth/autharmor/auth/request`);
+      const { data } = await Http.get(`/auth/autharmor/auth/request`, {
+        username
+      });
 
       if (data.response_message === "Timeout") {
         this._updateMessage("Authentication request timed out", "warn");
@@ -336,6 +338,8 @@ class AuthArmorSDK {
       return data;
     } catch (err) {
       console.error(err);
+      this._hidePopup();
+      throw err?.response?.data;
     }
   }
 
@@ -355,7 +359,5 @@ class AuthArmorSDK {
     };
   }
 }
-
-window.AuthArmor = AuthArmorSDK;
 
 export default AuthArmorSDK;
