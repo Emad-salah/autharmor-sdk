@@ -24,7 +24,7 @@
     "prettier": "^1.19.1"
   },
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "kjua": "^0.6.0"
   },
   "husky": {
